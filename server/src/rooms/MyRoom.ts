@@ -7,7 +7,7 @@ export class MyRoom extends Room<MyRoomState> {
   onCreate (options: any) {
     this.setState(new MyRoomState());
 
-    this.onMessage(0, (client, payload) => {
+    this.onMessage('move', (client, payload) => {
       //
       // handle "type" message
       //
@@ -28,8 +28,16 @@ export class MyRoom extends Room<MyRoomState> {
         player.y += velocity;
       }
     });
+
+    this.setSimulationInterval((deltaTime) => this.update(deltaTime));
   }
 
+  update(deltaTime: number) {
+    for (const player of this.state.players.values()) {
+      player.x += Math.random() * 10;
+      player.y += Math.random() * 10;
+    }
+  }
   onJoin (client: Client, options: any) {
     console.log(client.sessionId, "joined!");
 
