@@ -27,6 +27,7 @@ export class MyRoom extends Room<MyRoomState> {
       } else if (payload.down) {
         player.y += velocity;
       }
+      console.log(client.sessionId, "moved", payload);
     });
 
     this.setSimulationInterval((deltaTime) => this.update(deltaTime));
