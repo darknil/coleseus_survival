@@ -1,6 +1,11 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState, Player } from "./schema/MyRoomState";
 
+export type PositionMessage = {
+  x: number,
+  y: number
+}
+
 export class MyRoom extends Room<MyRoomState> {
   maxClients = 4;
 
@@ -42,19 +47,18 @@ export class MyRoom extends Room<MyRoomState> {
   onJoin (client: Client, options: any) {
     console.log(client.sessionId, "joined!");
 
-    const mapWidth = 800;
-    const mapHeight = 600;
+    this.state.players.set(client.sessionId, new Player());
 
-    // create Player instance
-    const player = new Player();
+    // Send welcome message to the client.
+    client.send("welcomeMessage", "Welcome to Colyseus!");
 
-    // place Player at a random position
-    player.x = (Math.random() * mapWidth);
-    player.y = (Math.random() * mapHeight);
-
-    // place player in the map of players by its sessionId
-    // (client.sessionId is unique per connection!)
-    this.state.players.set(client.sessionId, player);
+    // Listen to position changes from the client.
+    this.onMessage("position", (client, position: PositionMessage) => {
+      const player = this.state.players.get(client.sessionId);
+      player.x = position.x;
+      player.y = position.y;
+      console.log({position})
+    });
   }
 
   onLeave (client: Client, consented: boolean) {
