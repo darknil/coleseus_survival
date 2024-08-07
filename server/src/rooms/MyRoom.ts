@@ -54,10 +54,12 @@ export class MyRoom extends Room<MyRoomState> {
 
     // Listen to position changes from the client.
     this.onMessage("position", (client, position: PositionMessage) => {
+      console.log({position})
       const player = this.state.players.get(client.sessionId);
       player.x = position.x;
       player.y = position.y;
       console.log({position})
+      client.send("welcomeMessage", `position: ${position.x}, ${position.y}`);
     });
   }
 
