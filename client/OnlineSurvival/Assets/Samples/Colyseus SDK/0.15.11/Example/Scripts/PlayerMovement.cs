@@ -6,7 +6,7 @@ public class PlayerMovement : MonoBehaviour
     public float speed = 10f;
     private bool _moving;
     private NetworkManager _networkManager;
-    private Vector2 _targetPosition;
+    private Vector2 _targetPosition = Vector2.zero;
 
     public async void Start()
     {
@@ -21,7 +21,6 @@ public class PlayerMovement : MonoBehaviour
         });
         
         // Set player's new position after synchronized the mouse click's position with the Colyseus server.
-        
         _networkManager.GameRoom.State.OnChange(() =>
         {
             var player = _networkManager.GameRoom.State.players[_networkManager.GameRoom.SessionId];
@@ -33,6 +32,8 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.Log($"Player {key} has joined the Game!");
         });
+
+        _networkManager.PlayerPosition(_targetPosition);
     }
 
     private void Update()

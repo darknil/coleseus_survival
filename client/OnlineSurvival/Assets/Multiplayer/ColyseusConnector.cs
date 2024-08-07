@@ -1,67 +1,63 @@
 using Colyseus;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour
+public class ColyseusConnector : MonoBehaviour
 {
-    private const string DEFAULT_ROOM_NAME = "1KG_CHLENA";
-
-    
-    public ColyseusRoom<MyRoomState> MyRoom
-    {
-        get
-        {
-            if (room == null)
-            {
-                Debug.LogError("Рума не инициализированная. Саня че смотришь?");
-            }
-            return room;
-        }
-    }
-
-    //public ColyseusClient Client
-    //{
-    //    get
-    //    {
-    //        // Initialize Colyseus client, if the client has not been initiated yet or input values from the Menu have been changed.
-    //        if (_client == null || !_client.Settings.WebRequestEndpoint.Contains(_menuManager.HostAddress))
-    //        {
-    //            Initialize();
-    //        }
-    //        return _client;
-    //    }
-    //}
-
+    private const string DEFAULT_ROOM_NAME = "my_room";
 
     public PlayerController playerPrefab;
 
-    private static ColyseusRoom<MyRoomState> room = null;
-    private static ColyseusClient client;
+    public ColyseusRoom<MyRoomState> Room
+    { 
+        get => room;
+        private set
+        {
+            if (value == null) return;
+            room = value;
+            //room.OnJoin += Joined;
+            //room.OnLeave += Leave;
+        }
+    }
+
+    public ColyseusClient Client => client;
+
+    private ColyseusRoom<MyRoomState> room = null;
+    private ColyseusClient client;
 
 
-    async void Start()
+    public void Start()
     {
-        // Подключение к серверу
         client = new("ws://localhost:2567");
+    }
 
+    public async void TryJoin()
+    {
         // Подключение или создание комнаты
-        room = await client.JoinOrCreate<MyRoomState>("my_room");
+        room = await client.Create<MyRoomState>(DEFAULT_ROOM_NAME);
 
-        // Подписка на изменение состояния комнаты
-        room.OnJoin += Joined;
-        room.OnLeave += Leave;
-        //myRoom.OnStateChange += OnPlayerChange;
+        Debug.Log($"Попытка подключения к лобби {(room != null ? "УСПЕШНА" : "НЕУДАЧНА")}");
+
+        room.State.players.ForEach((value, player) => Debug.Log($"value: {value};\nplayer: {player}"));
+    }
+
+    public void TryLeave()
+    {
+        room.Leave();
+
+        Debug.Log($"Соединение {(room.colyseusConnection.IsOpen ? "не удалось закрыть" : "закрыто")}");
     }
 
     private void Joined()
     {
-        //room.State.OnChange();
+        CreatePlayer();
+
+        Debug.Log("Клиент обработал вход");
     }
 
     private void Leave(int _)
     {
-        
+        Debug.Log("Клиент обработал выход");
     }
-
 
 
     private void CreatePlayer()
