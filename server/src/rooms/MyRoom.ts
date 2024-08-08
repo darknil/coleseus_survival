@@ -13,10 +13,12 @@ export class MyRoom extends Room<MyRoomState> {
       //
       const player = this.state.players.get(client.sessionId);
       if (player) {
-          player.x += payload.x;
-          player.y += payload.y;
+          player.x = payload.x;
+          player.y = payload.y;
       }
-      console.log(client.sessionId, "moved", payload);
+      const editedPlayer = this.state.players.get(client.sessionId);
+      console.log('editedPlayer x:', editedPlayer.x);
+      console.log('editedPlayer y:', editedPlayer.y);
     });
   }
 
@@ -36,11 +38,13 @@ export class MyRoom extends Room<MyRoomState> {
     }
 
     this.state.players.set(client.sessionId, newPlayer);
-
-
+    const allPlayers = Array.from(this.state.players.values());
+    const playerNames = allPlayers.map(player => player.name);
+    console.log("playerNames", playerNames);
     // Send welcome message to the client.
     console.log("player", {name: options.name , message: "joined to room" });
-    client.send("joined", {name: options.name , message: "joined to room" });
+    client.send("welcomeMessage", { text: "Welcome to the game!" });
+    this.broadcast("playerJoined", { sessionId: client.sessionId, player: newPlayer });
 
   }
   onLeave (client: Client, consented: boolean) {
