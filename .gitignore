@@ -131,3 +131,8 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+client/OnlineSurvival/Library/
+client/OnlineSurvival/obj/
+client/OnlineSurvival/Temp/
+client/OnlineSurvival/obj/
+client/Build/OnlineSurvival_Data/
