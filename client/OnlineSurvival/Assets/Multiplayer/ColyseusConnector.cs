@@ -1,26 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Assets.Helpers;
 using Colyseus;
 using OS.PlayerSystem;
 using UnityEngine;
+using Zenject;
 
 namespace OS.Muliplayer
 {
-    public class ColyseusConnector : MonoBehaviourSingleton<ColyseusConnector>
+    public class ColyseusConnector : MonoBehaviour, IReadOnlyConnector
     {
         private const string DEFAULT_ROOM_NAME = "my_room";
 
-        public PlayerController playerPrefab;
-        public Player otherPlayerPrefab;
-
         public ColyseusRoom<MyRoomState> Room => room;
         public ColyseusClient Client => client;
+
+        private DiContainer container;
+        private Settings settings;
 
         private static ColyseusRoom<MyRoomState> room = null;
         private Dictionary<string, Player> players = new();
         private ColyseusClient client;
         private PlayerController localPlayer;
 
+
+        [Inject]
+        public void Construct(Settings settings, DiContainer container)
+        {
+            this.settings = settings;
+            this.container = container;
+        }
 
         public void Start()
         {
@@ -31,9 +40,9 @@ namespace OS.Muliplayer
         {
             if (room != null && room.colyseusConnection.IsOpen) return;
 
-            localPlayer = CreatePlayer();
             // Подключение или создание комнаты
-            room = await client.JoinOrCreate<MyRoomState>(DEFAULT_ROOM_NAME, new() { ["name"] = localPlayer.Nickname.text } );
+            room = await client.JoinOrCreate<MyRoomState>(DEFAULT_ROOM_NAME, new() { ["name"] = PlayerPrefs.GetString(NicknameController.NICKNAME_KEY) } );
+            localPlayer = CreatePlayer();
             SubscribeRoom();
 
             Debug.Log($"Попытка подключения к лобби {(room != null ? "УСПЕШНА" : "НЕУДАЧНА")}");
@@ -60,8 +69,13 @@ namespace OS.Muliplayer
         {
             if (room.SessionId == key) return;
 
-            var other = Instantiate(otherPlayerPrefab);
+            var other = container.InstantiatePrefabForComponent<Player>(settings.otherPlayerPrefab);
             other.SetName(player.name);
+            room.OnMessage<Vector2>("moved", position =>
+            {
+                other.transform.position = position;
+                Debug.Log($"x: {position.x}, y: {position.y}");
+            });
             players.Add(key, other);
 
             Debug.Log($"Клиент обработал вход пидора: {player.name}");
@@ -78,7 +92,7 @@ namespace OS.Muliplayer
 
         private PlayerController CreatePlayer()
         {
-            var player = Instantiate(playerPrefab);
+            var player = container.InstantiatePrefabForComponent<PlayerController>(settings.playerPrefab);
             player.SetName(PlayerPrefs.GetString(NicknameController.NICKNAME_KEY));
 
             return player;
@@ -87,6 +101,14 @@ namespace OS.Muliplayer
         private void DestroyPlayer()
         {
             Destroy(localPlayer.gameObject);
+        }
+
+
+        [Serializable]
+        public class Settings 
+        {
+            public PlayerController playerPrefab;
+            public Player otherPlayerPrefab;
         }
     }
 }
