@@ -11,6 +11,7 @@ Library: D:\Develop\Unity\coleseus_survival\client\OnlineSurvival\Temp\BurstOutp
 --assembly-defines=Assembly-CSharp;
 --assembly-defines=Unity.2D.IK.Runtime;
 --assembly-defines=Unity.Burst;
+--assembly-defines=Zenject;
 --assembly-defines=Unity.VisualScripting.Core;
 --assembly-defines=Unity.2D.Animation.Runtime;
 --assembly-defines=Unity.2D.Tilemap.Extras;
@@ -30,6 +31,7 @@ Library: D:\Develop\Unity\coleseus_survival\client\OnlineSurvival\Temp\BurstOutp
 --assembly-defines=Unity.Collections.LowLevel.ILSupport;
 --assembly-defines=Unity.VisualScripting.Antlr3.Runtime;
 --assembly-defines=Unity.Burst.Unsafe;
+--assembly-defines=Zenject-usage;
 --assembly-defines=System.Runtime;
 --assembly-defines=netstandard;
 --assembly-defines=Mono.Security;
@@ -104,6 +106,7 @@ Library: D:\Develop\Unity\coleseus_survival\client\OnlineSurvival\Temp\BurstOutp
 --assembly-defines=Assembly-CSharp;
 --assembly-defines=Unity.2D.IK.Runtime;
 --assembly-defines=Unity.Burst;
+--assembly-defines=Zenject;
 --assembly-defines=Unity.VisualScripting.Core;
 --assembly-defines=Unity.2D.Animation.Runtime;
 --assembly-defines=Unity.2D.Tilemap.Extras;
@@ -123,6 +126,7 @@ Library: D:\Develop\Unity\coleseus_survival\client\OnlineSurvival\Temp\BurstOutp
 --assembly-defines=Unity.Collections.LowLevel.ILSupport;
 --assembly-defines=Unity.VisualScripting.Antlr3.Runtime;
 --assembly-defines=Unity.Burst.Unsafe;
+--assembly-defines=Zenject-usage;
 --assembly-defines=System.Runtime;
 --assembly-defines=netstandard;
 --assembly-defines=Mono.Security;

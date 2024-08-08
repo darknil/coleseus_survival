@@ -1,6 +1,8 @@
-﻿using OS.Muliplayer;
+﻿using OS.Input;
+using OS.Muliplayer;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Zenject;
 
 namespace OS.PlayerSystem
 {
@@ -10,34 +12,47 @@ namespace OS.PlayerSystem
 
         public Rigidbody2D RB;
 
-        private Vector2 _targetPosition;
-        private Vector2 position;
+        private IReadOnlyConnector readOnlyConnector;
+        private GameInput input;
+        private Vector2 inputVector;
 
-        private bool _moving;
 
-
-        void FixedUpdate()
+        [Inject]
+        public void Construct(GameInput input, IReadOnlyConnector readOnlyConnector)
         {
-            // Перемещаем персонажа в соответствии с вводом
-            RB.velocity = position * moveSpeed;
+            this.input = input;
+            this.readOnlyConnector = readOnlyConnector;
+        }
 
-            if (_moving && (Vector2)transform.position != position)
+        private void Start()
+        {
+            input.Player.Enable();
+            input.Player.Move.performed += OnMove;
+            input.Player.Move.canceled += OnMove;
+        }
+
+        private void FixedUpdate()
+        {
+            RB.velocity = inputVector * moveSpeed;
+
+            if (inputVector != Vector2.zero)
             {
-                var step = moveSpeed * Time.deltaTime;
-                transform.position = Vector2.MoveTowards(transform.position, position, step);
-                ColyseusConnector.Instance.Room.Send("move", new { position.x, position.y });
-            }
-            else
-            {
-                _moving = false;
+                readOnlyConnector.Room.Send("move", new { transform.position.x, transform.position.y });
             }
         }
 
-
         // Метод, который будет вызван системой ввода при движении
-        public void OnMove(InputValue value)
+        public void OnMove(InputAction.CallbackContext context)
         {
-            position = value.Get<Vector2>();
+            switch (context.phase)
+            {
+                case InputActionPhase.Performed:
+                    inputVector = context.ReadValue<Vector2>();
+                    break;
+                case InputActionPhase.Canceled:
+                    inputVector = Vector2.zero;
+                    break;
+            }
         }
     }
 }
