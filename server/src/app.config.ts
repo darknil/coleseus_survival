@@ -51,5 +51,8 @@ export default config({
         /**
          * Before before gameServer.listen() is called.
          */
-    }
+    },
+    options: {
+        pingInterval: 0 // HERE
+    },
 });
