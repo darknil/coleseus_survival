@@ -10,6 +10,7 @@ Library: D:\Develop\Unity\coleseus_survival\client\OnlineSurvival\Temp\BurstOutp
 --assembly-defines=UnityEngine;
 --assembly-defines=Assembly-CSharp;
 --assembly-defines=Unity.2D.IK.Runtime;
+--assembly-defines=Leopotam.EcsLite;
 --assembly-defines=Unity.Burst;
 --assembly-defines=Zenject;
 --assembly-defines=Unity.VisualScripting.Core;
@@ -105,6 +106,7 @@ Library: D:\Develop\Unity\coleseus_survival\client\OnlineSurvival\Temp\BurstOutp
 --assembly-defines=UnityEngine;
 --assembly-defines=Assembly-CSharp;
 --assembly-defines=Unity.2D.IK.Runtime;
+--assembly-defines=Leopotam.EcsLite;
 --assembly-defines=Unity.Burst;
 --assembly-defines=Zenject;
 --assembly-defines=Unity.VisualScripting.Core;
