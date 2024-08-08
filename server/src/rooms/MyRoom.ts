@@ -39,8 +39,8 @@ export class MyRoom extends Room<MyRoomState> {
 
     this.state.players.set(client.sessionId, newPlayer);
     // Send welcome message to the client.
-    console.log("welcome", {player: newPlayer , message: "Welcome to the game!" });
-    client.send("welcome", {player: newPlayer , message: "Welcome to the game!" });
+    console.log("player", {player: newPlayer , message: "joined to room" });
+    client.send("player", {player: newPlayer , message: "joined to room" });
 
   }
 
