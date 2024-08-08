@@ -9,24 +9,12 @@ public class ColyseusConnector : MonoBehaviourSingleton<ColyseusConnector>
     public PlayerController playerPrefab;
     public GameObject otherPlayerPrefab;
 
-    private PlayerController localPlayer;
-
-    public ColyseusRoom<MyRoomState> Room
-    { 
-        get => room;
-        private set
-        {
-            if (value == null) return;
-            room = value;
-            room.OnJoin += Joined;
-            room.OnLeave += Leave;
-        }
-    }
-
+    public ColyseusRoom<MyRoomState> Room => room;
     public ColyseusClient Client => client;
 
-    private ColyseusRoom<MyRoomState> room = null;
+    private static ColyseusRoom<MyRoomState> room = null;
     private ColyseusClient client;
+    private PlayerController localPlayer;
 
 
     public void Start()
@@ -36,9 +24,10 @@ public class ColyseusConnector : MonoBehaviourSingleton<ColyseusConnector>
 
     public async void TryJoin()
     {
-        // Подключение или создание комнаты
-        room = await client.JoinOrCreate<MyRoomState>(DEFAULT_ROOM_NAME);
         localPlayer = CreatePlayer();
+        // Подключение или создание комнаты
+        room = await client.JoinOrCreate<MyRoomState>(DEFAULT_ROOM_NAME, new() { ["name"] = localPlayer.Nickname.text } );
+        SubscribeRoom();
 
         Debug.Log($"Попытка подключения к лобби {(room != null ? "УСПЕШНА" : "НЕУДАЧНА")}");
     }
@@ -51,11 +40,19 @@ public class ColyseusConnector : MonoBehaviourSingleton<ColyseusConnector>
         Debug.Log($"Соединение {(room.colyseusConnection.IsOpen ? "не удалось закрыть" : "закрыто")}");
     }
 
-    private void Joined()
+    private void SubscribeRoom()
     {
-        Instantiate(playerPrefab);
+        room.State.players.OnAdd(Joined);
+    }
 
-        Debug.Log("Клиент обработал вход пидора");
+    private void Joined(string key, Player player)
+    {
+        if (room.SessionId == key) return;
+
+        Instantiate(otherPlayerPrefab);
+
+        Debug.Log("Клиент обработал вход пидора." +
+            $"\nkey: {key}, player = x:{player.x}, y:{player}");
     }
 
     private void Leave(int _)
