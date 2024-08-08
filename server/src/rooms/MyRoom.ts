@@ -7,6 +7,7 @@ export class MyRoom extends Room<MyRoomState> {
   onCreate (options: any) {
     console.log("Room created with options:", options);
     this.setState(new MyRoomState());
+
   }
 
   update(deltaTime: number) {
@@ -38,9 +39,8 @@ export class MyRoom extends Room<MyRoomState> {
       console.log(client.sessionId, "moved", payload);
     });
     // Send welcome message to the client.
-    const player = this.state.players.get(client.sessionId);
-    console.log("player", {player: player , message: "joined to room" });
-    client.send("joined", {player: player , message: "joined to room" });
+    console.log("player", {player: newPlayer , message: "joined to room" });
+    client.send("joined", {player: newPlayer , message: "joined to room" });
 
   }
 
