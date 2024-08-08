@@ -134,5 +134,3 @@ crashlytics-build.properties
 client/OnlineSurvival/Library/
 client/OnlineSurvival/obj/
 client/OnlineSurvival/Temp/
-client/OnlineSurvival/obj/
-client/Build/OnlineSurvival_Data/

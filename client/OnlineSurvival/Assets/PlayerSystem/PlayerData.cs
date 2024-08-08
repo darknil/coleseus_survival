@@ -2,16 +2,15 @@
 
 namespace OS.PlayerSystem
 {
-    [System.Serializable]
     public class PlayerData : Schema
     {
         [Type(0, "string")]
         public string name;
 
-        [Type(1, "float")]
+        [Type(1, "number")]
         public float x = 0;
 
-        [Type(2, "float")]
+        [Type(2, "number")]
         public float y = 0;
     }
 }

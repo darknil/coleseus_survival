@@ -65,25 +65,22 @@ namespace OS.Muliplayer
             room.State.players.OnRemove(Leave);
         }
 
-        private void Joined(string key, PlayerData player)
+        private void Joined(string key, PlayerData playerData)
         {
             if (room.SessionId == key) return;
 
-            var other = container.InstantiatePrefabForComponent<Player>(settings.otherPlayerPrefab);
-            other.SetName(player.name);
-            room.OnMessage<Vector2>("moved", position =>
-            {
-                other.transform.position = position;
-                Debug.Log($"x: {position.x}, y: {position.y}");
-            });
-            players.Add(key, other);
+            var player = container.InstantiatePrefabForComponent<Player>(settings.otherPlayerPrefab);
+            player.SetName(playerData.name);
+            var netPlayer = room.State.players[key];
+            netPlayer.OnChange(() => player.transform.position = new(netPlayer.x, netPlayer.y));
+            players.Add(key, player);
 
-            Debug.Log($"Клиент обработал вход пидора: {player.name}");
+            Debug.Log($"Клиент обработал вход пидора: {playerData.name}");
         }
 
         private void Leave(string key, PlayerData player)
         {
-            Destroy(players[key]);
+            Destroy(players[key].gameObject);
             players.Remove(key);
 
             Debug.Log($"Клиент обработал выход пидора: {player.name}");
