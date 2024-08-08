@@ -13,8 +13,12 @@ export default config({
         /**
          * Define your room handlers:
          */
-        gameServer.define('my_room', MyRoom);
-
+        const roomNames = [
+            "my_room",
+        ];
+        for (const roomName of roomNames) {
+            gameServer.define(roomName, MyRoom);
+        }
     },
 
     initializeExpress: (app) => {

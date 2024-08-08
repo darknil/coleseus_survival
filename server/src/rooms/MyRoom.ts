@@ -30,10 +30,17 @@ export class MyRoom extends Room<MyRoomState> {
   }
   onJoin (client: Client, options: any) {
     console.log(client.sessionId, "joined!");
-    this.state.players.set(client.sessionId, new Player());
-    const player = this.state.players.get(client.sessionId);
+    console.log("options", options);
+
+    const newPlayer = new Player();
+    if (options.name) {
+      newPlayer.name = options.name;
+    }
+
+    this.state.players.set(client.sessionId, newPlayer);
     // Send welcome message to the client.
-    client.send("welcome", {player: player , message: "Welcome to the game!" });
+    console.log("player", {player: newPlayer , message: "joined to room" });
+    client.send("player", {player: newPlayer , message: "joined to room" });
 
   }
 
