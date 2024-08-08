@@ -15,4 +15,6 @@ MonoBehaviour:
   colyseusServerAddress: localhost
   colyseusServerPort: 2567
   useSecureProtocol: 0
-  _requestHeaders: []
+  _requestHeaders:
+  - name: 
+    value: 

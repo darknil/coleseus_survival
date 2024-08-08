@@ -1,71 +1,76 @@
+п»їusing Assets.Helpers;
 using Colyseus;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour
+public class ColyseusConnector : MonoBehaviourSingleton<ColyseusConnector>
 {
-    private const string DEFAULT_ROOM_NAME = "1KG_CHLENA";
-
-    
-    public ColyseusRoom<MyRoomState> MyRoom
-    {
-        get
-        {
-            if (room == null)
-            {
-                Debug.LogError("Рума не инициализированная. Саня че смотришь?");
-            }
-            return room;
-        }
-    }
-
-    //public ColyseusClient Client
-    //{
-    //    get
-    //    {
-    //        // Initialize Colyseus client, if the client has not been initiated yet or input values from the Menu have been changed.
-    //        if (_client == null || !_client.Settings.WebRequestEndpoint.Contains(_menuManager.HostAddress))
-    //        {
-    //            Initialize();
-    //        }
-    //        return _client;
-    //    }
-    //}
-
+    private const string DEFAULT_ROOM_NAME = "my_room";
 
     public PlayerController playerPrefab;
+    public GameObject otherPlayerPrefab;
+
+    public ColyseusRoom<MyRoomState> Room => room;
+    public ColyseusClient Client => client;
 
     private static ColyseusRoom<MyRoomState> room = null;
-    private static ColyseusClient client;
+    private ColyseusClient client;
+    private PlayerController localPlayer;
 
 
-    async void Start()
+    public void Start()
     {
-        // Подключение к серверу
         client = new("ws://localhost:2567");
-
-        // Подключение или создание комнаты
-        room = await client.JoinOrCreate<MyRoomState>("my_room");
-
-        // Подписка на изменение состояния комнаты
-        room.OnJoin += Joined;
-        room.OnLeave += Leave;
-        //myRoom.OnStateChange += OnPlayerChange;
     }
 
-    private void Joined()
+    public async void TryJoin()
     {
-        //room.State.OnChange();
+        localPlayer = CreatePlayer();
+        // РџРѕРґРєР»СЋС‡РµРЅРёРµ РёР»Рё СЃРѕР·РґР°РЅРёРµ РєРѕРјРЅР°С‚С‹
+        room = await client.JoinOrCreate<MyRoomState>(DEFAULT_ROOM_NAME, new() { ["name"] = localPlayer.Nickname.text } );
+        SubscribeRoom();
+
+        Debug.Log($"РџРѕРїС‹С‚РєР° РїРѕРґРєР»СЋС‡РµРЅРёСЏ Рє Р»РѕР±Р±Рё {(room != null ? "РЈРЎРџР•РЁРќРђ" : "РќР•РЈР”РђР§РќРђ")}");
+    }
+
+    public void TryLeave()
+    {
+        DestroyPlayer();
+        room.Leave();
+
+        Debug.Log($"РЎРѕРµРґРёРЅРµРЅРёРµ {(room.colyseusConnection.IsOpen ? "РЅРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РєСЂС‹С‚СЊ" : "Р·Р°РєСЂС‹С‚Рѕ")}");
+    }
+
+    private void SubscribeRoom()
+    {
+        room.State.players.OnAdd(Joined);
+    }
+
+    private void Joined(string key, Player player)
+    {
+        if (room.SessionId == key) return;
+
+        Instantiate(otherPlayerPrefab);
+
+        Debug.Log("РљР»РёРµРЅС‚ РѕР±СЂР°Р±РѕС‚Р°Р» РІС…РѕРґ РїРёРґРѕСЂР°." +
+            $"\nkey: {key}, player = x:{player.x}, y:{player}");
     }
 
     private void Leave(int _)
     {
-        
+        Debug.Log("РљР»РёРµРЅС‚ РѕР±СЂР°Р±РѕС‚Р°Р» РІС‹С…РѕРґ РїРёРґРѕСЂР°");
     }
 
 
-
-    private void CreatePlayer()
+    private PlayerController CreatePlayer()
     {
-        Instantiate(playerPrefab);
+        var player = Instantiate(playerPrefab);
+        player.SetName(PlayerPrefs.GetString(NicknameController.NICKNAME_KEY));
+
+        return player;
+    }
+
+    private void DestroyPlayer()
+    {
+        Destroy(localPlayer.gameObject);
     }
 }
