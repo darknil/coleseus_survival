@@ -1,25 +1,29 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
 
+    public Rigidbody2D RB;
+    public TMP_Text Nickname;
+
     private Vector2 position;
-    private Rigidbody2D rb;
 
     private bool _moving;
+
 
     void FixedUpdate()
     {
         // Перемещаем персонажа в соответствии с вводом
-        rb.velocity = position * moveSpeed;
-        //_networkManager.PlayerPosition(rb.velocity);
+        RB.velocity = position * moveSpeed;
 
         if (_moving && (Vector2)transform.position != position)
         {
             var step = moveSpeed * Time.deltaTime;
             transform.position = Vector2.MoveTowards(transform.position, position, step);
+            ColyseusConnector.Instance.Room.Send("move", new { position.x, position.y });
         }
         else
         {
@@ -32,5 +36,10 @@ public class PlayerController : MonoBehaviour
     public void OnMove(InputValue value)
     {
         position = value.Get<Vector2>();
+    }
+
+    public void SetName(string name)
+    {
+        Nickname.text = name;
     }
 }

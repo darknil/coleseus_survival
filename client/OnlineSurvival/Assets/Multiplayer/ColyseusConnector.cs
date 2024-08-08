@@ -1,11 +1,15 @@
+п»їusing Assets.Helpers;
 using Colyseus;
 using UnityEngine;
 
-public class ColyseusConnector : MonoBehaviour
+public class ColyseusConnector : MonoBehaviourSingleton<ColyseusConnector>
 {
     private const string DEFAULT_ROOM_NAME = "my_room";
 
     public PlayerController playerPrefab;
+    public GameObject otherPlayerPrefab;
+
+    private PlayerController localPlayer;
 
     public ColyseusRoom<MyRoomState> Room
     { 
@@ -14,8 +18,8 @@ public class ColyseusConnector : MonoBehaviour
         {
             if (value == null) return;
             room = value;
-            //room.OnJoin += Joined;
-            //room.OnLeave += Leave;
+            room.OnJoin += Joined;
+            room.OnLeave += Leave;
         }
     }
 
@@ -32,36 +36,44 @@ public class ColyseusConnector : MonoBehaviour
 
     public async void TryJoin()
     {
-        // Подключение или создание комнаты
-        room = await client.Create<MyRoomState>(DEFAULT_ROOM_NAME);
+        // РџРѕРґРєР»СЋС‡РµРЅРёРµ РёР»Рё СЃРѕР·РґР°РЅРёРµ РєРѕРјРЅР°С‚С‹
+        room = await client.JoinOrCreate<MyRoomState>(DEFAULT_ROOM_NAME);
+        localPlayer = CreatePlayer();
 
-        Debug.Log($"Попытка подключения к лобби {(room != null ? "УСПЕШНА" : "НЕУДАЧНА")}");
-
-        room.State.players.ForEach((value, player) => Debug.Log($"value: {value};\nplayer: {player}"));
+        Debug.Log($"РџРѕРїС‹С‚РєР° РїРѕРґРєР»СЋС‡РµРЅРёСЏ Рє Р»РѕР±Р±Рё {(room != null ? "РЈРЎРџР•РЁРќРђ" : "РќР•РЈР”РђР§РќРђ")}");
     }
 
     public void TryLeave()
     {
+        DestroyPlayer();
         room.Leave();
 
-        Debug.Log($"Соединение {(room.colyseusConnection.IsOpen ? "не удалось закрыть" : "закрыто")}");
+        Debug.Log($"РЎРѕРµРґРёРЅРµРЅРёРµ {(room.colyseusConnection.IsOpen ? "РЅРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РєСЂС‹С‚СЊ" : "Р·Р°РєСЂС‹С‚Рѕ")}");
     }
 
     private void Joined()
     {
-        CreatePlayer();
+        Instantiate(playerPrefab);
 
-        Debug.Log("Клиент обработал вход");
+        Debug.Log("РљР»РёРµРЅС‚ РѕР±СЂР°Р±РѕС‚Р°Р» РІС…РѕРґ РїРёРґРѕСЂР°");
     }
 
     private void Leave(int _)
     {
-        Debug.Log("Клиент обработал выход");
+        Debug.Log("РљР»РёРµРЅС‚ РѕР±СЂР°Р±РѕС‚Р°Р» РІС‹С…РѕРґ РїРёРґРѕСЂР°");
     }
 
 
-    private void CreatePlayer()
+    private PlayerController CreatePlayer()
     {
-        Instantiate(playerPrefab);
+        var player = Instantiate(playerPrefab);
+        player.SetName(PlayerPrefs.GetString(NicknameController.NICKNAME_KEY));
+
+        return player;
+    }
+
+    private void DestroyPlayer()
+    {
+        Destroy(localPlayer.gameObject);
     }
 }
