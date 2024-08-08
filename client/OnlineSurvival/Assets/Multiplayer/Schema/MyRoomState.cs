@@ -6,10 +6,11 @@
 // 
 
 using Colyseus.Schema;
+using OS.PlayerSystem;
 
 public partial class MyRoomState : Schema
 {
-	[Type(0, "map", typeof(MapSchema<Player>))]
-	public MapSchema<Player> players = new MapSchema<Player>();
+	[Type(0, "map", typeof(MapSchema<PlayerData>))]
+	public MapSchema<PlayerData> players = new();
 }
 
