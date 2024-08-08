@@ -36,11 +36,12 @@ export class MyRoom extends Room<MyRoomState> {
     }
 
     this.state.players.set(client.sessionId, newPlayer);
-
-
+    const allPlayers = Array.from(this.state.players.values());
+    const playerNames = allPlayers.map(player => player.name);
+    console.log("playerNames", playerNames);
     // Send welcome message to the client.
     console.log("player", {name: options.name , message: "joined to room" });
-    client.send("joined", {name: options.name , message: "joined to room" });
+    this.broadcast("playerJoined", { sessionId: client.sessionId, player: newPlayer });
 
   }
   onLeave (client: Client, consented: boolean) {
