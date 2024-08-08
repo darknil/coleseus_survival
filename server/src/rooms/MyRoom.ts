@@ -13,10 +13,12 @@ export class MyRoom extends Room<MyRoomState> {
       //
       const player = this.state.players.get(client.sessionId);
       if (player) {
-          player.x += payload.x;
-          player.y += payload.y;
+          player.x = payload.x;
+          player.y = payload.y;
       }
-      console.log(client.sessionId, "moved", payload);
+      const editedPlayer = this.state.players.get(client.sessionId);
+      console.log('editedPlayer x:', editedPlayer.x);
+      console.log('editedPlayer y:', editedPlayer.y);
     });
   }
 
