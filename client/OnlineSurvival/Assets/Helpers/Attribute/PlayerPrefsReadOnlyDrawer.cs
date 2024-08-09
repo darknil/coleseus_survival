@@ -1,7 +1,7 @@
-﻿using Assets.Helpers;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
+#if UNITY_EDITOR
 [CustomPropertyDrawer(typeof(PlayerPrefsReadOnlyAttribute))]
 public class PlayerPrefsReadOnlyDrawer : PropertyDrawer
 {
@@ -16,3 +16,4 @@ public class PlayerPrefsReadOnlyDrawer : PropertyDrawer
         EditorGUI.LabelField(position, label.text, currentValue);
     }
 }
+#endif

@@ -8,6 +8,7 @@ Library: D:\Develop\Unity\coleseus_survival\client\OnlineSurvival\Temp\BurstOutp
 --float-precision=Standard
 --target-framework=NetFramework
 --assembly-defines=UnityEngine;
+--assembly-defines=Assembly-CSharp-firstpass;
 --assembly-defines=Assembly-CSharp;
 --assembly-defines=Unity.2D.IK.Runtime;
 --assembly-defines=Leopotam.EcsLite;
@@ -24,9 +25,9 @@ Library: D:\Develop\Unity\coleseus_survival\client\OnlineSurvival\Temp\BurstOutp
 --assembly-defines=Unity.InputSystem.ForUI;
 --assembly-defines=Unity.Collections;
 --assembly-defines=Unity.2D.SpriteShape.Runtime;
---assembly-defines=ColyseusSDK;
 --assembly-defines=Unity.2D.PixelPerfect;
 --assembly-defines=Unity.Mathematics;
+--assembly-defines=ColyseusSDK;
 --assembly-defines=Unity.TextMeshPro;
 --assembly-defines=Unity.VisualScripting.State;
 --assembly-defines=Zenject-usage;
@@ -104,6 +105,7 @@ Library: D:\Develop\Unity\coleseus_survival\client\OnlineSurvival\Temp\BurstOutp
 --float-precision=Standard
 --target-framework=NetFramework
 --assembly-defines=UnityEngine;
+--assembly-defines=Assembly-CSharp-firstpass;
 --assembly-defines=Assembly-CSharp;
 --assembly-defines=Unity.2D.IK.Runtime;
 --assembly-defines=Leopotam.EcsLite;
@@ -120,9 +122,9 @@ Library: D:\Develop\Unity\coleseus_survival\client\OnlineSurvival\Temp\BurstOutp
 --assembly-defines=Unity.InputSystem.ForUI;
 --assembly-defines=Unity.Collections;
 --assembly-defines=Unity.2D.SpriteShape.Runtime;
---assembly-defines=ColyseusSDK;
 --assembly-defines=Unity.2D.PixelPerfect;
 --assembly-defines=Unity.Mathematics;
+--assembly-defines=ColyseusSDK;
 --assembly-defines=Unity.TextMeshPro;
 --assembly-defines=Unity.VisualScripting.State;
 --assembly-defines=Zenject-usage;

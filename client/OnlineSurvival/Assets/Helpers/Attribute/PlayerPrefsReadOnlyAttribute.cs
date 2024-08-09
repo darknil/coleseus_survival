@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+#if UNITY_EDITOR
 public class PlayerPrefsReadOnlyAttribute : PropertyAttribute
 {
     public string Key { get; private set; }
@@ -8,3 +9,4 @@ public class PlayerPrefsReadOnlyAttribute : PropertyAttribute
         Key = key;
     }
 }
+#endif

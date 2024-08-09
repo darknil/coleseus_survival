@@ -6,9 +6,14 @@ namespace Game.Players
     [Serializable]
     public class PlayerConfig
     {
-        [PlayerPrefsReadOnly(Association.PlayerPrefs.PLAYER_NAME)
-            , SerializeField] private string ReadName;
-        [PlayerPrefs(Association.PlayerPrefs.PLAYER_NAME)] public string Nickname;
+#if UNITY_EDITOR
+        [PlayerPrefsReadOnly(Association.PlayerPrefs.PLAYER_NAME)]
+#endif
+        [SerializeField] private string ReadName;
+#if UNITY_EDITOR
+        [PlayerPrefs(Association.PlayerPrefs.PLAYER_NAME)]
+#endif
+        public string Nickname;
         public float Speed = 5f;
     }
 }

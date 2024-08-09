@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
+#if UNITY_EDITOR
 [CustomPropertyDrawer(typeof(PlayerPrefsAttribute))]
 public class PlayerPrefsDrawer : PropertyDrawer
 {
@@ -23,3 +24,4 @@ public class PlayerPrefsDrawer : PropertyDrawer
         }
     }
 }
+#endif

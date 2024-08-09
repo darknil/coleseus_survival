@@ -24,7 +24,7 @@ namespace Game.Muliplayer
         private EcsWorld ecsWord;
 
         private static ColyseusRoom<MyRoomState> room = null;
-        private Dictionary<string, PlayerNickname> players = new();
+        private Dictionary<string, GameObject> players = new();
         private ColyseusClient client;
 
 
@@ -51,18 +51,12 @@ namespace Game.Muliplayer
             CreateLocalPlayer();
 
             SubscribeRoom();
-
-            Debug.Log($"Попытка подключения к лобби {(room != null ? "УСПЕШНА" : "НЕУДАЧНА")}");
         }
 
         public void TryLeave()
         {
-            if (room == null || !room.colyseusConnection.IsOpen) return;
-
             DestroyLocalPlayer();
             room.Leave();
-
-            Debug.Log($"Соединение {(room.colyseusConnection.IsOpen ? "не удалось закрыть" : "закрыто")}");
         }
 
 
@@ -87,7 +81,7 @@ namespace Game.Muliplayer
 
         private void Leave(string key, PlayerData player)
         {
-            Destroy(players[key].gameObject);
+            Destroy(players[key]);
             players.Remove(key);
 
             Debug.Log($"Клиент обработал выход пидора: {player.name}");
