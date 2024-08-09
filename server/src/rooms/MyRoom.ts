@@ -1,60 +1,50 @@
-import { Room, Client } from "@colyseus/core";
-import { MyRoomState, Player } from "./schema/MyRoomState";
+import { Room, Client } from '@colyseus/core'
+import { World, Entity } from 'ecsy'
+import { MyRoomState } from './schema/MyRoomState'
+import { PositionComponent } from '../components/position.component'
+
+type ECSWorld = World
 
 export class MyRoom extends Room<MyRoomState> {
-  maxClients = 4;
+  world: ECSWorld
+  ticker: NodeJS.Timeout
+  entityMap: Map<string, Entity> = new Map()
+  onCreate(options: any) {
+    this.setState(new MyRoomState())
+    this.world = new World()
+    this.world.registerComponent(PositionComponent)
 
-  onCreate (options: any) {
-    console.log("Room created with options:", options);
-    this.setState(new MyRoomState());
-    this.onMessage('move', (client, payload) => {
-      //
-      // handle "type" message
-      //
-      const player = this.state.players.get(client.sessionId);
-      if (player) {
-          player.x = payload.x;
-          player.y = payload.y;
-      }
-      const editedPlayer = this.state.players.get(client.sessionId);
-      console.log('editedPlayer x:', editedPlayer.x);
-      console.log('editedPlayer y:', editedPlayer.y);
-    });
+    this.ticker = setInterval(
+      (deltaTime: number) => this.update(deltaTime),
+      1000 / 60
+    ) as unknown as NodeJS.Timeout
   }
-
   update(deltaTime: number) {
-    for (const player of this.state.players.values()) {
-      player.x += Math.random() * 10;
-      player.y += Math.random() * 10;
-    }
+    this.world.execute()
+    this.state.entities.forEach((value, key) => {
+      const entity = this.entityMap.get(key)
+      if (entity) {
+        const position = entity.getComponent(PositionComponent)
+        this.state.entities.set(
+          key,
+          JSON.stringify({ x: position.x, y: position.y })
+        )
+      }
+    })
+    this.clients.forEach((client) => {
+      client.send('update', { entities: this.state.entities })
+    })
   }
-  onJoin (client: Client, options: any) {
-    console.log(client.sessionId, "joined!");
-    console.log("options", options);
 
-    const newPlayer = new Player();
-    if (options.name) {
-      newPlayer.name = options.name;
-    }
-
-    this.state.players.set(client.sessionId, newPlayer);
-    const allPlayers = Array.from(this.state.players.values());
-    const playerNames = allPlayers.map(player => player.name);
-    console.log("playerNames", playerNames);
-    // Send welcome message to the client.
-    console.log("player", {name: options.name , message: "joined to room" });
-    client.send("welcomeMessage", { text: "Welcome to the game!" });
-    this.broadcast("playerJoined", { sessionId: client.sessionId, player: newPlayer });
-
+  onJoin(client: Client, options: any) {
+    const entity = this.world.createEntity()
+    entity.addComponent(PositionComponent, { x: 0, y: 0 })
+    this.state.entities.set(client.sessionId, JSON.stringify({ x: 0, y: 0 }))
+    client.send('position', { x: 0, y: 0 })
   }
-  onLeave (client: Client, consented: boolean) {
-    console.log(client.sessionId, "left!");
-    this.state.players.delete(client.sessionId);
-    this.broadcast("playerLeft", { sessionId: client.sessionId });
-  }
+  onLeave(client: Client, consented: boolean) {}
 
   onDispose() {
-    console.log("room", this.roomId, "disposing...");
+    clearInterval(this.ticker)
   }
-
 }
