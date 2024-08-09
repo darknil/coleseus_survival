@@ -1,13 +1,15 @@
 ﻿using Leopotam.EcsLite;
-using OS.Input;
+using Game.ECS.Input;
+using Game.ECS.Move;
 
-namespace OS.Move
+namespace Game.ECS.Players.Move
 {
-    public sealed class PlayerMovementSystem : IEcsInitSystem, IEcsRunSystem
+    public sealed class MovementSystem : IEcsInitSystem, IEcsRunSystem
     {
         private EcsFilter filter;
         private EcsPool<MovableComponent> movables;
         private EcsPool<PlayerInputComponent> inputPool;
+
 
         public void Init(IEcsSystems systems)
         {

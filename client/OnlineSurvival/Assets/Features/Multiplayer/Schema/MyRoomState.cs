@@ -6,7 +6,7 @@
 // 
 
 using Colyseus.Schema;
-using OS.PlayerSystem;
+using Game.PlayerSystem;
 
 public partial class MyRoomState : Schema
 {

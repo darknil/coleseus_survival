@@ -1,4 +1,4 @@
-﻿namespace OS.Players
+﻿namespace Game.ECS.Players
 {
     public struct PlayerComponent
     {

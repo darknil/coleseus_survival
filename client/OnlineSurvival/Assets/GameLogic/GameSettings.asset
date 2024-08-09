@@ -13,5 +13,9 @@ MonoBehaviour:
   m_Name: GameSettings
   m_EditorClassIdentifier: 
   player:
-    Name: 
-    Speed: 0
+    ReadName: 
+    Nickname: 1KG
+    Speed: 8.68
+  connector:
+    playerPrefab: {fileID: 5676672659516833429, guid: 9c07b8e313d48e441a979a92b50c382a, type: 3}
+    otherPlayerPrefab: {fileID: 5676672659516833429, guid: e9a8aa798ff4c7447bb2b2e2fa2ac90e, type: 3}

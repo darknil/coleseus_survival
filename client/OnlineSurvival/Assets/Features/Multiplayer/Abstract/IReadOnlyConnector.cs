@@ -1,6 +1,6 @@
 ﻿using Colyseus;
 
-namespace OS.Muliplayer
+namespace Game.Muliplayer
 {
     public interface IReadOnlyConnector
     {

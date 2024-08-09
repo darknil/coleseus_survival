@@ -1,23 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using Assets.Helpers;
 using Colyseus;
 using Leopotam.EcsLite;
-using OS.Input;
-using OS.Move;
-using OS.Players;
-using OS.PlayerSystem;
+using Game.Ecs.Multiplayer;
+using Game.ECS.Input;
+using Game.ECS.Move;
+using Game.ECS.Players;
+using Game.Players;
+using Game.PlayerSystem;
 using TMPro;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Zenject;
 
-namespace OS.Muliplayer
+namespace Game.Muliplayer
 {
     public class ColyseusConnector : MonoBehaviour, IReadOnlyConnector
     {
-        private const string DEFAULT_ROOM_NAME = "my_room";
-
         public ColyseusRoom<MyRoomState> Room => room;
         public ColyseusClient Client => client;
 
@@ -28,7 +26,6 @@ namespace OS.Muliplayer
         private static ColyseusRoom<MyRoomState> room = null;
         private Dictionary<string, PlayerNickname> players = new();
         private ColyseusClient client;
-        private PlayerController localPlayer;
 
 
         [Inject]
@@ -49,8 +46,8 @@ namespace OS.Muliplayer
             if (room != null && room.colyseusConnection.IsOpen) return;
 
             // Подключение или создание комнаты
-            room = await client.JoinOrCreate<MyRoomState>(DEFAULT_ROOM_NAME, new() { ["name"] = PlayerPrefs.GetString(Association.PlayerPrefs.PLAYER_NAME) } );
-            //localPlayer = CreatePlayer();
+            room = await client.JoinOrCreate<MyRoomState>(Association.Multiplayer.DEFAULT_ROOM_NAME,
+                                                          new() { ["name"] = PlayerPrefs.GetString(Association.PlayerPrefs.PLAYER_NAME) });
             CreateLocalPlayer();
 
             SubscribeRoom();
@@ -62,7 +59,7 @@ namespace OS.Muliplayer
         {
             if (room == null || !room.colyseusConnection.IsOpen) return;
 
-            DestroyPlayer();
+            DestroyLocalPlayer();
             room.Leave();
 
             Debug.Log($"Соединение {(room.colyseusConnection.IsOpen ? "не удалось закрыть" : "закрыто")}");
@@ -79,10 +76,10 @@ namespace OS.Muliplayer
         {
             if (room.SessionId == key) return;
 
-            var player = container.InstantiatePrefabForComponent<PlayerNickname>(settings.otherPlayerPrefab);
-            player.SetName(playerData.name);
-            var netPlayer = room.State.players[key];
-            netPlayer.OnChange(() => player.transform.position = new(netPlayer.x, netPlayer.y));
+            var player = Instantiate(settings.otherPlayerPrefab);
+            player.GetComponentInChildren<TMP_Text>().text = playerData.name;
+            var netPlayerData = room.State.players[key];
+            netPlayerData.OnChange(() => player.transform.position = new(netPlayerData.x, netPlayerData.y));
             players.Add(key, player);
 
             Debug.Log($"Клиент обработал вход пидора: {playerData.name}");
@@ -96,41 +93,36 @@ namespace OS.Muliplayer
             Debug.Log($"Клиент обработал выход пидора: {player.name}");
         }
 
-
-        private PlayerController CreatePlayer()
-        {
-            var player = container.InstantiatePrefabForComponent<PlayerController>(settings.playerPrefab);
-            player.SetName(PlayerPrefs.GetString(Association.PlayerPrefs.PLAYER_NAME));
-
-            return player;
-        }
-
         private void CreateLocalPlayer()
         {
             var playerGO = Instantiate(settings.playerPrefab);
             var playerEntity = ecsWord.NewEntity();
             var config = container.Resolve<PlayerConfig>();
 
-            var players = ecsWord.GetPool<PlayerComponent>();
-            var inputs = ecsWord.GetPool<PlayerInputComponent>();
-            var movables = ecsWord.GetPool<MovableComponent>();
 
             // basePlayer
-            ref var playerComponent = ref players.Add(playerEntity);
+            var playersPool = ecsWord.GetPool<PlayerComponent>();
+            ref var playerComponent = ref playersPool.Add(playerEntity);
             playerComponent.name = config.Nickname;
             playerGO.GetComponentInChildren<TMP_Text>().text = config.Nickname;
 
             // inputs
-            ref var playerInputComponent = ref inputs.Add(playerEntity);
+            var inputPlayersPool = ecsWord.GetPool<PlayerInputComponent>();
+            ref var playerInputComponent = ref inputPlayersPool.Add(playerEntity);
 
             // move
-            ref var movableComponent = ref movables.Add(playerEntity);
+            var movablePool = ecsWord.GetPool<MovableComponent>();
+            ref var movableComponent = ref movablePool.Add(playerEntity);
             movableComponent.transform = playerGO.transform;
             movableComponent.rigidbody = playerGO.GetComponent<Rigidbody2D>();
             movableComponent.speed = config.Speed;
+
+            //net
+            var netSendPool = ecsWord.GetPool<NetSendMarker>();
+            netSendPool.Add(playerEntity);
         }
 
-        private void DestroyPlayer()
+        private void DestroyLocalPlayer()
         {
             var filter = ecsWord.Filter<MovableComponent>().Exc<PlayerInputComponent>().End();
             var movables = ecsWord.GetPool<MovableComponent>();
@@ -147,7 +139,7 @@ namespace OS.Muliplayer
         public class Settings 
         {
             public GameObject playerPrefab;
-            public PlayerNickname otherPlayerPrefab;
+            public GameObject otherPlayerPrefab;
         }
     }
 }

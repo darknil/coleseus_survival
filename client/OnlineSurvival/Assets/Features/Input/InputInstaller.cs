@@ -1,6 +1,6 @@
 ﻿using Zenject;
 
-namespace OS.Input
+namespace Game.Input
 {
     public class InputInstaller : MonoInstaller
     {

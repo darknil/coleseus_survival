@@ -1,15 +1,21 @@
 ﻿using Leopotam.EcsLite;
-using OS.Input;
+using Game.ECS;
+using Game.Input;
+using Game.Muliplayer;
 using Zenject;
 
-namespace OS.GameLogic
+namespace Game.MainLogic
 {
     public sealed class GameInstaller : MonoInstaller
     {
+        public ColyseusConnector connector;
+
+
         public override void InstallBindings()
         {
             BindESC();
             BindInput();
+            BindConnector();
         }
 
 
@@ -27,6 +33,12 @@ namespace OS.GameLogic
             Container.Bind<GameInput>()
                             .AsSingle()
                             .NonLazy();
+        }
+
+        private void BindConnector()
+        {
+            Container.BindInterfacesTo<ColyseusConnector>()
+                .FromInstance(connector);
         }
     }
 }

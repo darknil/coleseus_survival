@@ -1,6 +1,6 @@
 ﻿using Colyseus.Schema;
 
-namespace OS.PlayerSystem
+namespace Game.PlayerSystem
 {
     public class PlayerData : Schema
     {

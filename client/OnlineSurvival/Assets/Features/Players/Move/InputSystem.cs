@@ -1,17 +1,18 @@
 ﻿using Leopotam.EcsLite;
-using OS.Input;
+using Game.ECS.Input;
+using Game.Input;
 using UnityEngine;
 
-namespace OS.Players
+namespace Game.ECS.Players.Move
 {
-    public sealed class PlayerInputSystem : IEcsInitSystem, IEcsRunSystem
+    public sealed class InputSystem : IEcsInitSystem, IEcsRunSystem
     {
         private EcsFilter filter;
         private EcsPool<PlayerInputComponent> playersInput;
 
         private readonly GameInput gameInput;
 
-        public PlayerInputSystem(GameInput gameInput) 
+        public InputSystem(GameInput gameInput) 
         { 
             this.gameInput = gameInput;
         }

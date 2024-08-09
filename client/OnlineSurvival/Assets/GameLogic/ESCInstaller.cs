@@ -1,11 +1,10 @@
 ﻿using System;
 using Leopotam.EcsLite;
-using OS.Input;
-using OS.Move;
-using OS.Players;
+using Game.Input;
+using Game.Muliplayer;
 using Zenject;
 
-namespace OS.GameLogic
+namespace Game.ECS
 {
     public sealed class ESCInstaller : IInitializable, ITickable, ILateTickable, IDisposable
     {
@@ -16,11 +15,13 @@ namespace OS.GameLogic
         private IEcsSystems lateUpdateSystems;
 
         private readonly GameInput inputs;
+        private readonly IReadOnlyConnector connector;
 
-        public ESCInstaller(EcsWorld world, GameInput inputs)
+        public ESCInstaller(EcsWorld world, GameInput inputs, IReadOnlyConnector connector)
         {
             this.world = world;
             this.inputs = inputs;
+            this.connector = connector;
         }
 
 
@@ -29,7 +30,8 @@ namespace OS.GameLogic
             // Update
             updateSystems = new EcsSystems(world);
             updateSystems
-                .Add(new PlayerInputSystem(inputs))
+                .Add(new Players.Move.InputSystem(inputs))
+                .Add(new Players.Move.NetSendSystem(connector))
 #if UNITY_EDITOR
                 // Регистрируем отладочные системы по контролю за состоянием каждого отдельного мира:
                 //.Add (new Leopotam.EcsLite.UnityEditor.EcsWorldDebugSystem ("events"))
@@ -43,7 +45,7 @@ namespace OS.GameLogic
             // FixedUpdate
             lateUpdateSystems = new EcsSystems(world);
             lateUpdateSystems
-                .Add(new PlayerMovementSystem())
+                .Add(new Players.Move.MovementSystem())
                 .Init();
         }
 
