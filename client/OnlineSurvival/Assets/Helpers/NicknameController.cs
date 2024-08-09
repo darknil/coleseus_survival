@@ -6,8 +6,6 @@ namespace Assets.Helpers
     [RequireComponent(typeof(TMP_InputField))]
     public class NicknameController : MonoBehaviour
     {
-        public const string NICKNAME_KEY = "nickname";
-
         public TMP_InputField Input;
 
         public void Awake()
@@ -19,13 +17,13 @@ namespace Assets.Helpers
         {
             Input.onEndEdit.AddListener(NickChange);
 
-            string nickname = PlayerPrefs.GetString(NICKNAME_KEY);
+            string nickname = PlayerPrefs.GetString(Association.PlayerPrefs.PLAYER_NAME);
             Input.text = nickname;
         }
 
         private void NickChange(string name)
         {
-            PlayerPrefs.SetString(NICKNAME_KEY, name);
+            PlayerPrefs.SetString(Association.PlayerPrefs.PLAYER_NAME, name);
         }
     }
 }

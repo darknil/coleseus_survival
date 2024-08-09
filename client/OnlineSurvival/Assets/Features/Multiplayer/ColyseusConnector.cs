@@ -2,7 +2,13 @@
 using System.Collections.Generic;
 using Assets.Helpers;
 using Colyseus;
+using Leopotam.EcsLite;
+using OS.Input;
+using OS.Move;
+using OS.Players;
 using OS.PlayerSystem;
+using TMPro;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Zenject;
 
@@ -17,18 +23,20 @@ namespace OS.Muliplayer
 
         private DiContainer container;
         private Settings settings;
+        private EcsWorld ecsWord;
 
         private static ColyseusRoom<MyRoomState> room = null;
-        private Dictionary<string, Player> players = new();
+        private Dictionary<string, PlayerNickname> players = new();
         private ColyseusClient client;
         private PlayerController localPlayer;
 
 
         [Inject]
-        public void Construct(Settings settings, DiContainer container)
+        public void Construct(Settings settings, DiContainer container, EcsWorld ecsWorld)
         {
             this.settings = settings;
             this.container = container;
+            this.ecsWord = ecsWorld;
         }
 
         public void Start()
@@ -41,8 +49,10 @@ namespace OS.Muliplayer
             if (room != null && room.colyseusConnection.IsOpen) return;
 
             // Подключение или создание комнаты
-            room = await client.JoinOrCreate<MyRoomState>(DEFAULT_ROOM_NAME, new() { ["name"] = PlayerPrefs.GetString(NicknameController.NICKNAME_KEY) } );
-            localPlayer = CreatePlayer();
+            room = await client.JoinOrCreate<MyRoomState>(DEFAULT_ROOM_NAME, new() { ["name"] = PlayerPrefs.GetString(Association.PlayerPrefs.PLAYER_NAME) } );
+            //localPlayer = CreatePlayer();
+            CreateLocalPlayer();
+
             SubscribeRoom();
 
             Debug.Log($"Попытка подключения к лобби {(room != null ? "УСПЕШНА" : "НЕУДАЧНА")}");
@@ -69,7 +79,7 @@ namespace OS.Muliplayer
         {
             if (room.SessionId == key) return;
 
-            var player = container.InstantiatePrefabForComponent<Player>(settings.otherPlayerPrefab);
+            var player = container.InstantiatePrefabForComponent<PlayerNickname>(settings.otherPlayerPrefab);
             player.SetName(playerData.name);
             var netPlayer = room.State.players[key];
             netPlayer.OnChange(() => player.transform.position = new(netPlayer.x, netPlayer.y));
@@ -90,22 +100,54 @@ namespace OS.Muliplayer
         private PlayerController CreatePlayer()
         {
             var player = container.InstantiatePrefabForComponent<PlayerController>(settings.playerPrefab);
-            player.SetName(PlayerPrefs.GetString(NicknameController.NICKNAME_KEY));
+            player.SetName(PlayerPrefs.GetString(Association.PlayerPrefs.PLAYER_NAME));
 
             return player;
         }
 
+        private void CreateLocalPlayer()
+        {
+            var playerGO = Instantiate(settings.playerPrefab);
+            var playerEntity = ecsWord.NewEntity();
+            var config = container.Resolve<PlayerConfig>();
+
+            var players = ecsWord.GetPool<PlayerComponent>();
+            var inputs = ecsWord.GetPool<PlayerInputComponent>();
+            var movables = ecsWord.GetPool<MovableComponent>();
+
+            // basePlayer
+            ref var playerComponent = ref players.Add(playerEntity);
+            playerComponent.name = config.Nickname;
+            playerGO.GetComponentInChildren<TMP_Text>().text = config.Nickname;
+
+            // inputs
+            ref var playerInputComponent = ref inputs.Add(playerEntity);
+
+            // move
+            ref var movableComponent = ref movables.Add(playerEntity);
+            movableComponent.transform = playerGO.transform;
+            movableComponent.rigidbody = playerGO.GetComponent<Rigidbody2D>();
+            movableComponent.speed = config.Speed;
+        }
+
         private void DestroyPlayer()
         {
-            Destroy(localPlayer.gameObject);
+            var filter = ecsWord.Filter<MovableComponent>().Exc<PlayerInputComponent>().End();
+            var movables = ecsWord.GetPool<MovableComponent>();
+
+            foreach (var entity in filter)
+            {
+                ref var player = ref movables.Get(entity);
+                Destroy(player.transform.gameObject);
+            }
         }
 
 
         [Serializable]
         public class Settings 
         {
-            public PlayerController playerPrefab;
-            public Player otherPlayerPrefab;
+            public GameObject playerPrefab;
+            public PlayerNickname otherPlayerPrefab;
         }
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace OS.PlayerSystem
 {
-    public class Player : MonoBehaviour
+    public class PlayerNickname : MonoBehaviour
     {
         public TMP_Text Nickname;
 

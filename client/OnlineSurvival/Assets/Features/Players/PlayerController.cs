@@ -6,7 +6,7 @@ using Zenject;
 
 namespace OS.PlayerSystem
 {
-    public class PlayerController : Player
+    public class PlayerController : PlayerNickname
     {
         public float moveSpeed = 5f;
 
